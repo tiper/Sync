@@ -186,7 +186,12 @@ public protocol SyncDelegate: class {
             let changeIDs = (changes as NSArray).value(forKey: parentRelationship.destinationEntity!.sync_remotePrimaryKey()) as! NSArray
             
             for case let safeObject as NSManagedObject in objects.array {
-                let currentID = safeObject.value(forKey: safeObject.entity.sync_localPrimaryKey())!
+                let key = safeObject.entity.sync_localPrimaryKey()
+                guard let currentID = safeObject.value(forKey: key) else {
+                    print("error: Failed to get value for key \(key)")
+                    continue
+                }
+                
                 let remoteIndex = changeIDs.index(of: currentID)
                 let relatedObjects = parent.mutableOrderedSetValue(forKey: parentRelationship.name)
                 
