@@ -56,7 +56,10 @@ class DataFilter: NSObject {
             }
 
             for fetchedID in deletedObjectIDs {
-                let objectID = primaryKeysAndObjectIDs[fetchedID]!
+                guard let objectID = primaryKeysAndObjectIDs[fetchedID] else {
+                    print("error: Failed to get primary key for \(fetchedID)")
+                    continue
+                }
                 let object = context.object(with: objectID)
                 context.delete(object)
             }
@@ -69,7 +72,10 @@ class DataFilter: NSObject {
             }
 
             for fetchedID in insertedObjectIDs {
-                let objectDictionary = remotePrimaryKeysAndChanges[fetchedID]!
+                guard let objectDictionary = remotePrimaryKeysAndChanges[fetchedID] else {
+                    print("error: Failed to get primary key for \(fetchedID)")
+                    continue
+                }
                 inserted(objectDictionary)
             }
         }
@@ -80,8 +86,14 @@ class DataFilter: NSObject {
             let updatedObjectIDs = intersection.array
 
             for case let fetchedID as NSObject in updatedObjectIDs {
-                let JSON = remotePrimaryKeysAndChanges[fetchedID]!
-                let objectID = primaryKeysAndObjectIDs[fetchedID]!
+                guard let JSON = remotePrimaryKeysAndChanges[fetchedID] else {
+                    print("error: Failed to get remote primary key for \(fetchedID)")
+                    continue
+                }
+                guard let objectID = primaryKeysAndObjectIDs[fetchedID] else {
+                    print("error: Failed to get primary key for \(fetchedID)")
+                    continue
+                }
                 let object = context.object(with: objectID)
                 updated(JSON, object)
             }
