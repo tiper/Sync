@@ -25,8 +25,8 @@ class DataFilter: NSObject {
                        remotePrimaryKey: String,
                        context: NSManagedObjectContext,
                        inserted: (_ json: [String: Any]) -> Void,
-                       updated: (_ json: [String: Any], _ updatedObject: NSManagedObject) -> Void) {
-        self.changes(changes, inEntityNamed: entityName, predicate: nil, operations: .all, localPrimaryKey: localPrimaryKey, remotePrimaryKey: remotePrimaryKey, context: context, inserted: inserted, updated: updated)
+                       updated: (_ json: [String: Any], _ updatedObject: NSManagedObject) -> Void) throws {
+        try self.changes(changes, inEntityNamed: entityName, predicate: nil, operations: .all, localPrimaryKey: localPrimaryKey, remotePrimaryKey: remotePrimaryKey, context: context, inserted: inserted, updated: updated)
     }
 
     class func changes(_ changes: [[String: Any]],
@@ -36,8 +36,8 @@ class DataFilter: NSObject {
                        localPrimaryKey: String,
                        remotePrimaryKey: String,
                        context: NSManagedObjectContext,
-                       inserted: (_ json: [String: Any]) -> Void,
-                       updated: (_ json: [String: Any], _ updatedObject: NSManagedObject) -> Void) {
+                       inserted: (_ json: [String: Any]) throws -> Void,
+                       updated: (_ json: [String: Any], _ updatedObject: NSManagedObject) throws -> Void) throws {
         // `DataObjectIDs.objectIDsInEntityNamed` also deletes all objects that don't have a primary key or that have the same primary key already found in the context
         let primaryKeysAndObjectIDs = context.managedObjectIDs(in: entityName, usingAsKey: localPrimaryKey, predicate: predicate) as [NSObject: NSManagedObjectID]
         let localPrimaryKeys = Array(primaryKeysAndObjectIDs.keys)
@@ -76,7 +76,7 @@ class DataFilter: NSObject {
                     print("error: Failed to get primary key for \(fetchedID)")
                     continue
                 }
-                inserted(objectDictionary)
+                try inserted(objectDictionary)
             }
         }
 
@@ -95,7 +95,7 @@ class DataFilter: NSObject {
                     continue
                 }
                 let object = context.object(with: objectID)
-                updated(JSON, object)
+                try updated(JSON, object)
             }
         }
     }

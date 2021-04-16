@@ -167,18 +167,18 @@ public protocol SyncDelegate: class {
         }
 
         let dataFilterOperations = DataFilter.Operation(rawValue: operations.rawValue)
-        DataFilter.changes(changes, inEntityNamed: entityName, predicate: finalPredicate, operations: dataFilterOperations, localPrimaryKey: localPrimaryKey, remotePrimaryKey: remotePrimaryKey, context: context, inserted: { JSON in
+        try DataFilter.changes(changes, inEntityNamed: entityName, predicate: finalPredicate, operations: dataFilterOperations, localPrimaryKey: localPrimaryKey, remotePrimaryKey: remotePrimaryKey, context: context, inserted: { JSON in
             let shouldContinue = shouldContinueBlock?() ?? true
             guard shouldContinue else { return }
 
             let created = NSEntityDescription.insertNewObject(forEntityName: entityName, into: context)
             let interceptedJSON = objectJSONBlock?(JSON) ?? JSON
-            created.sync_fill(with: interceptedJSON, parent: parent, parentRelationship: parentRelationship, context: context, operations: operations, shouldContinueBlock: shouldContinueBlock, objectJSONBlock: objectJSONBlock)
+            try created.sync_fill(with: interceptedJSON, parent: parent, parentRelationship: parentRelationship, context: context, operations: operations, shouldContinueBlock: shouldContinueBlock, objectJSONBlock: objectJSONBlock)
         }) { JSON, updatedObject in
             let shouldContinue = shouldContinueBlock?() ?? true
             guard shouldContinue else { return }
 
-            updatedObject.sync_fill(with: JSON, parent: parent, parentRelationship: parentRelationship, context: context, operations: operations, shouldContinueBlock: shouldContinueBlock, objectJSONBlock: objectJSONBlock)
+            try updatedObject.sync_fill(with: JSON, parent: parent, parentRelationship: parentRelationship, context: context, operations: operations, shouldContinueBlock: shouldContinueBlock, objectJSONBlock: objectJSONBlock)
         }
         
         // We have inserted, updated, and deleted objects. Now lets put them in the correct order if appropriate.
